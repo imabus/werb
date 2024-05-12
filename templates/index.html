@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input type="text" id="input" placeholder="enter command">
+    <button onclick="custon_req()">Enter</button>
+    <br>
+    <label id="text"></label>
+    <br>
+    <button onclick="off()">off</button>
+    <button onclick="on()">on</button>
+    <br>
+    <div class="slidecontainer">
+        <input type="range" min="1" max="255" value="50" class="slider" id="brightness" onchange="change_brightness()">
+        <button onclick="change_brightness()">select brightness</button>
+    </div>
+
+
+
+
+    <script>
+        function recieve_output(){
+            const url = 'http://192.168.20.103:8899/recieve-output'
+            fetch(url)
+            .then(response => response.json())
+            .then(json => {
+                console.log(json)
+                document.getElementById('text').innerHTML = JSON.stringify(json)
+            })
+        }
+
+
+
+        function post_req(operation){
+            //var operation = document.getElementById('input').value;
+            var xhr = new XMLHttpRequest();
+            re = ""
+
+            xhr.open('POST', 'http://192.168.20.103:8899/sent-op', true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.send(JSON.stringify(({ data: operation })))
+
+            xhr.onload = function () {
+                if(xhr.status == 200){
+                    console.log(xhr.status)
+                    recieve_output()
+                    re = true
+                }else{
+                    //console.log('unknown ', xhr.status)
+                    re = false
+                }
+            }
+            return re
+        }
+
+        function custon_req(){
+            req = document.getElementById('input').value;
+            post_req(req)
+        }
+
+        function off(){
+            req = "off"
+            post_req(req)
+        }
+
+        function on(){
+            req = "on"
+            post_req(req)
+        }
+
+        function change_brightness(){
+            slider = document.getElementById("brightness");
+            brightness = slider.value;
+            req = "brightness " + brightness
+            post_req(req)
+        }
+        
+
+    </script>
+</body>
+</html>
